@@ -1,0 +1,47 @@
+// Email Reply Drafter — Prisma schema
+// SQLite is the local-first store. A Draft stores the original inbound email
+// plus a JSON-stringified array of variation drafts (short/medium/detailed).
+// ToneProfile is a singleton-ish editable profile; QuickReply holds canned
+// short replies the user can insert with one click.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Draft {
+  id            String   @id @default(cuid())
+  emailSubject  String
+  emailBody     String
+  senderName    String?
+  threadContext  String?
+  tonePresetId  String?
+  variations    String   // JSON array of { length: 'short'|'medium'|'detailed', content: string }
+  toneId        String?
+  copyCount     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ToneProfile {
+  id               String   @id @default(cuid())
+  name             String
+  styleDescription String
+  sentenceLength   String
+  useEmoji         Boolean  @default(false)
+  signOff          String?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+}
+
+model QuickReply {
+  id        String   @id @default(cuid())
+  name      String
+  body      String
+  category  String   @default("general")
+  createdAt DateTime @default(now())
+}
